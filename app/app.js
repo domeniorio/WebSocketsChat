@@ -15,9 +15,10 @@ const pageStartup = () => {
   button.innerText = 'send';
   const ul = document.createElement('ul');
   div.appendChild(form);
-  div.appendChild(textInput);
-  div.appendChild(button);
+  form.appendChild(textInput);
+  form.appendChild(button);
   div.appendChild(ul);
+  form.addEventListener('submit', sendMsg);
 }
 
 
@@ -28,12 +29,18 @@ const sendMsg = (e) => {
   e.preventDefault();
   const input = document.getElementById('input');
   if (input.value){
-    socket.send(input.value);
+    wsocket.send(input.value);
     input.value = '';
   }
   input.focus();
 }
 
-document.getElementById('form')
-    .addEventListener('submit', sendMsg);
- 
+
+//listening for messages
+
+//({data}) destructuring dell'oggetto message, estraggo il campo data
+wsocket.addEventListener("message", ({data}) => {
+  const li = document.createElement('li');
+  li.textContent = data;
+  document.querySelector('ul').appendChild(li);
+})
