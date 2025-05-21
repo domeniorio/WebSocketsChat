@@ -15,8 +15,8 @@ const wss = new websocket.Server({ server: httpServer })
 
 wss.on('connection', (ws) => {
     ws.on('message', (message) => {
-        console.log(message)
-        ws.send(message)
+        console.log(message.toString())
+        ws.send(message.toString())
     })
 })
 
