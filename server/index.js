@@ -16,17 +16,24 @@ const expressServer = app.listen(port, () => console.log(`http and ws server lis
 
 //app.get('/', (req,res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-const wss = new Server(expressServer , {
+const io = new Server(expressServer , {
     cors: {
         origin: process.env.NODE_ENV === 'production' ? '*' : '*'
     }
 });
 
-wss.on('connection', ws => {
+io.on('connection', ws => {
     console.log(`User ${ws.id} connected`)
+    
+    ws.emit('message', 'ciaoooo') //questo va solo a chi si è appena connesso, uso ws invece di io
+    ws.broadcast.emit('message',`User ${ws.id} connected`) //questo va a tutti gli altri
     ws.on('message', data => {
         console.log(data)
-        ws.emit('message', `${ws.id}: ${data}`)
+        ws.broadcast.emit('message', `${ws.id}: ${data}`)
     })
-})
 
+    ws.on('disconnect', () => ws.broadcast.emit('message',`User ${ws.id} disconnect`)) //questo va a tutti gli altri
+
+    ws.on('activity', (name) =>  ws.broadcast.emit('activity', name))
+     
+})
