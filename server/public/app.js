@@ -24,12 +24,12 @@ const pageStartup = () => {
 
 document.body.onload = pageStartup;
 
-const wsocket = new WebSocket('ws:localhost:3000');
+const wsocket = io('http://localhost:3000');
 const sendMsg = (e) => {
   e.preventDefault();
   const input = document.getElementById('input');
   if (input.value){
-    wsocket.send(input.value);
+    wsocket.emit('message', input.value);
     input.value = '';
   }
   input.focus();
@@ -39,7 +39,7 @@ const sendMsg = (e) => {
 //listening for messages
 
 //({data}) destructuring dell'oggetto message, estraggo il campo data
-wsocket.addEventListener("message", ({data}) => {
+wsocket.on("message", (data) => {
   const li = document.createElement('li');
   li.textContent = data;
   document.querySelector('ul').appendChild(li);

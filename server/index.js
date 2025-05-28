@@ -1,23 +1,32 @@
-const express = require('express');
-const http = require('http');
-const websocket = require('ws');
-const path = require('path');
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import {Server} from 'socket.io';
+
+
+const port = 3000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 const app = express();
-const port = 3000;
+app.use(express.static(path.join(__dirname, 'public')));
+const expressServer = app.listen(port, () => console.log(`http and ws server listening on port ${port}`));
 
-app.use(express.static(path.join(__dirname, '..', 'app')));
 
 //app.get('/', (req,res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-const httpServer = http.createServer(app);
-const wss = new websocket.Server({ server: httpServer })
+const wss = new Server(expressServer , {
+    cors: {
+        origin: process.env.NODE_ENV === 'production' ? '*' : '*'
+    }
+});
 
-wss.on('connection', (ws) => {
-    ws.on('message', (message) => {
-        console.log(message.toString())
-        ws.send(message.toString())
+wss.on('connection', ws => {
+    console.log(`User ${ws.id} connected`)
+    ws.on('message', data => {
+        console.log(data)
+        ws.emit('message', `${ws.id}: ${data}`)
     })
 })
 
-httpServer.listen(port, () => console.log(`http and ws server listening on port ${port}`));
